@@ -7,7 +7,7 @@ import numpy as np
 
 from . import config as C
 from .models import features
-from .planners import IDM, clip_cmd
+from .planners import IDM, clip_cmd, idm_forecast
 
 
 def cutin_windows(n_scen, rng, expert=None, v_range=(4.0, 16.0), gap_range=(2.5, 60.0), steps_after=20, stride=2):
@@ -50,4 +50,14 @@ def dagger_windows(planner, logs, idx, expert=None):
     #   (hist_rel, v, gap, lead_v) của các hàng còn đang lái: np.concatenate theo từng thành phần. (3) X =
     #   features('perc', hist_rel, v, gap, lead_v). (4) Y = idm_forecast(expert, v, gap, lead_v): nhãn là
     #   việc luật IDM sẽ làm Ở CHÍNH các trạng thái đó. Trả (X, Y).
-    raise NotImplementedError("TODO dagger_windows: xem GUIDE.md, Bước 7")
+    from . import sim
+    expert = expert or IDM()
+    records = []
+    sim.rollout_logs(planner, logs, idx, record=records)
+    if not records:
+        return (np.empty((0, C.H + 4), dtype=np.float32),
+                np.empty((0, C.F), dtype=np.float32))
+    hist_rel, v, gap, lead_v = (np.concatenate([r[j] for r in records], axis=0) for j in range(4))
+    X = features("perc", hist_rel, v, gap, lead_v)
+    Y = idm_forecast(expert, v, gap, lead_v)
+    return X, Y
