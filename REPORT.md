@@ -57,7 +57,17 @@ Tỷ lệ va chạm EgoMLP dao động 15,2–36,8% giữa 5 seed, chênh 21,2 �
 ## Câu 6 · Tác nhân phản ứng
 Dán bảng "xe sau phát lại" và "xe sau phản ứng". `T` bạn hiệu chỉnh là bao nhiêu, xe sau chân thực đến mức nào so với xe không phản ứng? Vì sao IDM bị tính "va chạm giả" khi xe sau chỉ phát lại, và điều này làm đổi kết luận về bộ điều khiển ra sao?
 
-IDM phía sau được hiệu chỉnh `T=1,4 s`: khoảng cách Wasserstein với phân bố headway người lái là 0,347, thấp hơn nhiều so với xe không phản ứng (0,882); headway trung vị của người lái là 1,87 s. Ở độ trễ 0,6 s, xe sau phát lại làm IDM bị tính 64,9% va chạm phía sau và 70,1% va chạm bất kỳ; khi xe sau phản ứng, va chạm phía sau về 0% và va chạm bất kỳ còn 5,1% (phía trước). Với PercMLP, tổng va chạm là 82,3% ở thế giới replay nhưng 18,4% ở thế giới phản ứng; phần lớn chênh lệch đến từ xe sau replay không hề phanh khi xe thử giảm tốc. Đây là va chạm giả do giả định tác nhân không phản ứng, không phải lỗi riêng của IDM; đánh giá trong thế giới có phản ứng làm IDM trở lại mức tốt nhất, vì thế kết luận phải xét cả hai thế giới.
+IDM phía sau được hiệu chỉnh `T=1,4 s`: khoảng cách Wasserstein với phân bố headway người lái là 0,347, thấp hơn so với xe không phản ứng (0,882); headway trung vị của người lái là 1,87 s. Bảng dưới dùng độ trễ 0,6 giây và tỷ lệ trên toàn lưới cut-in:
+
+| Bộ điều khiển | Replay: va chạm bất kỳ | Reactive: va chạm bất kỳ | Va chạm phía sau: replay → reactive |
+|---|---:|---:|---:|
+| constant-velocity | 73,4% | 73,4% | 0,0% → 0,0% |
+| IDM | 70,1% | 5,1% | 64,9% → 0,0% |
+| EgoMLP | 76,2% | 76,2% | 0,0% → 0,0% |
+| PercMLP | 82,3% | 18,4% | 64,1% → 0,0% |
+| PercMLP+ | 69,5% | 5,3% | 64,3% → 0,0% |
+
+Xe sau replay không phanh khi xe thử giảm tốc, nên tạo ra va chạm phía sau giả: IDM bị tính 64,9% va chạm sau và 70,1% va chạm bất kỳ trong chế độ replay, nhưng khi xe sau phản ứng thì va chạm sau về 0% và tổng còn 5,1% (va chạm phía trước). Với PercMLP, tổng va chạm giảm từ 82,3% xuống 18,4% khi đổi sang thế giới phản ứng, cũng chủ yếu do bỏ các va chạm sau giả. Vì thế cần xét hành vi tác nhân khi diễn giải thứ hạng; trong thế giới phản ứng ở thử nghiệm này, IDM có tỷ lệ va chạm thấp nhất.
 
 ## Câu 7 · Cổng phát hành và sửa
 Quy tắc nào chặn PercMLP và nguyên nhân gốc là gì (dẫn số)? Bạn sửa bằng gì và vì sao nó chữa đúng nguyên nhân? Sau khi qua cổng, PercMLP+ có **tốt hơn** IDM không? Nó có nên được phát hành không, và bạn đề xuất làm gì trước khi quyết định?
